@@ -9,17 +9,17 @@ import uvicorn
 
 PLANT_MODELS = {
     'potato': {
-        'model': tf.keras.models.load_model('potato.h5'),
+        'model': tf.keras.models.load_model('../model/potato.h5'),
         'class_names': ['Potato early blight', 'Potato late blight', 'Healthy potato']
     },
     'tomato': {
-        'model': tf.keras.models.load_model('tomato.h5'),
+        'model': tf.keras.models.load_model('../model/tomato.h5'),
         'class_names': ['Tomato bacterial spot', 'Tomato early blight', 'Tomato late blight', 'Tomato leaf mold', 'Tomato septoria leaf spot', 
                             'Tomato two spotted spider mites', 'Tomato target spot', 'Tomato yellow leaf curl virus',
                             'Tomato mosaic virus', 'Healthy tomato']
     },
     'pepper': {
-        'model': tf.keras.models.load_model('pepper.h5'),
+        'model': tf.keras.models.load_model('../model/pepper.h5'),
         'class_names': ['Pepper bell bacterial spot', 'Healthy pepper bell']
     }
 }
