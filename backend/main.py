@@ -102,3 +102,5 @@ if __name__ == "__main__":
     port=8000,
     reload=True
 )
+
+# uvicorn main:app --host 0.0.0.0 --port 8000 --reload # to run the application
