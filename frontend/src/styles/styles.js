@@ -8,34 +8,54 @@ export const mainHomeStyle = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(240, 240, 240, 0.5)", // Semi-transparent background
   },
   title: {
     fontSize: 24,
-    textAlign:'center',
+    textAlign: "center",
     fontWeight: "bold",
     marginBottom: 20,
   },
-  image: {
-    width: 300,
-    height: 200,
-    marginBottom: 20,
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover", // Cover the entire screen
   },
-  dateTimeContainer: {
+  weatherContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Semi-transparent white background
+    borderRadius: 10,
+    padding: 20,
     marginVertical: 20,
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    borderWidth: 1, // Border width
+    borderColor: "rgba(255, 255, 255, 0.4)", // Border color (dark green)
   },
-  dateTimeText: {
+  weatherText: {
+    textAlign: "center",
+    fontSize: 19,
+    fontWeight: "500",
+    paddingBottom: "10px",
+  },
+  textStyle: {
+    fontSize: 15,
+    color: "black",
+    textAlign: "left",
+    marginVertical: 2,
+    fontWeight: "400",
+  },
+  weatherIcon: {
+    width: 90,
+    height: 80,
+  },
+  buttonText: {
+    borderRadius: 5,
+    padding: 8,
+    backgroundColor: "#2E8B57",
+    color: "#fff",
     fontSize: 16,
-    color: "#333",
+    textAlign: "center",
   },
 });
 
@@ -123,16 +143,16 @@ export const homeStyle = StyleSheet.create({
   },
   button: {
     flexDirection: "row",
- alignItems: "center", // Center items vertically
-  justifyContent: "center",
+    alignItems: "center", // Center items vertically
+    justifyContent: "center",
     width: "80%", // Use percentage-based width
     marginVertical: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
     backgroundColor: "#007BFF",
     borderRadius: 5,
-    alignItems: "center", 
-    gap:'10px'
+    alignItems: "center",
+    gap: "10px",
   },
   buttonText: {
     color: "white",

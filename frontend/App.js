@@ -7,6 +7,7 @@ import Home from "./src/pages/Home";
 import Upload from "./src/pages/Upload";
 import Login from "./src/pages/Login";
 import Signup from "./src/pages/Signup";
+import Header from "./src/components/Header";
 
 const Tab = createBottomTabNavigator();
 
@@ -15,7 +16,8 @@ const App = () => {
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
-          headerShown:true,
+          headerShown: true,
+          headerTitle: () => <Header />, // Use the Header component as the header title
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
 
