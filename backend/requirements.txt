@@ -5,3 +5,4 @@ numpy==1.21
 pillow==10.4.0
 python-multipart==0.0.18
 python-dotenv==1.0.1
+pydantic[email]
