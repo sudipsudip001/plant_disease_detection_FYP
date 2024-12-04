@@ -7,6 +7,8 @@ from PIL import Image
 import io
 import uvicorn
 
+
+#loading models
 PLANT_MODELS = {
     'potato': {
         'model': tf.keras.models.load_model('../model/potato.h5'),
@@ -26,6 +28,7 @@ PLANT_MODELS = {
 
 app = FastAPI()
 
+#CORS to allow API access from any frontend domain
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -34,6 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#image prepocessing to match the model
 def preprocess_image(file_bytes, target_size=(256, 256)):
     try:
         img = Image.open(io.BytesIO(file_bytes))
@@ -52,6 +56,7 @@ def preprocess_image(file_bytes, target_size=(256, 256)):
         print(f"Error while preprocessing image: {e}")
         return None
 
+#api-endpoints
 @app.get("/available-plants")
 async def get_available_plants():
     return {"available_plants": list(PLANT_MODELS.keys())}
@@ -96,9 +101,10 @@ async def predict(plant: str, file: UploadFile = File(...)):
 async def health_check():
     return {"status": "working"}
 
+#to run the file
 if __name__ == "__main__":
     uvicorn.run("main:app",
-    host="0.0.0.0",
+    host="localhost",
     port=8000,
     reload=True
 )
