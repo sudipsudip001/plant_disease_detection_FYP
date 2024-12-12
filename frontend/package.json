@@ -10,22 +10,23 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",
+    "@react-native-community/netinfo": "11.4.1",
+    "@react-native-picker/picker": "2.9.0",
     "axios": "^1.7.8",
     "axois": "^0.0.1-security",
-    "expo": "~52.0.9",
-    "expo-file-system": "^18.0.4",
+    "dotenv": "^16.4.7",
+    "expo": "~52.0.18",
+    "expo-camera": "^16.0.9",
+    "expo-constants": "~17.0.3",
+    "expo-file-system": "~18.0.5",
     "expo-image-picker": "~16.0.3",
+    "expo-network": "~7.0.3",
     "expo-status-bar": "~2.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "0.76.2",
+    "react-native": "^0.76.5",
     "react-native-image-picker": "^7.1.2",
-    "react-native-web": "~0.19.13",
-    "expo-network": "~7.0.2",
-    "@react-native-community/netinfo": "11.4.1",
-    "expo-constants": "~17.0.3",
-    "@react-native-picker/picker": "2.9.0",
-    "expo-camera": "~16.0.7"
+    "react-native-web": "~0.19.13"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

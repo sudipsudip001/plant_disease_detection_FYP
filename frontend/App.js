@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import {
+  ScrollView,
   View,
   Button,
   Image,
@@ -32,7 +33,7 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = "http://192.168.1.68:8000"; // change this ip address according to your device's ip address
+    val = "http://192.168.1.66:8000"; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }
@@ -115,24 +116,25 @@ const App = () => {
   };
 
   //module for uploading image using camera
-  const uploadPhoto = async() => {
+  const uploadPhoto = async () => {
     const formData = new FormData();
     formData.append("file", {
       uri: capturedImage,
       type: "image/jpeg",
-      name: 'photo.jpg',
+      name: "photo.jpg",
     });
-    try{
-      const response = await axios.post(`http://192.168.1.68:8000/predict/${selectedPlant}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    try {
+      const response = await axios.post(`${val}/predict/${selectedPlant}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       setPrediction(response.data);
-    }catch(error){
+    } catch (error) {
       console.log("There was an error: ", error);
     }
-  }
+  };
 
   const uploadImage = async () => {
     if (!imageUri) {
@@ -225,6 +227,7 @@ const App = () => {
               <View>
                 <Text>Prediction: {prediction.predicted_class}</Text>
                 <Text>Confidence: {prediction.confidence.toFixed(2)}</Text>
+                <Button title="Detailed explanation" onPress={()=> setCurrentView("detailedExplanation")}/>
               </View>
             )}
             <Button
@@ -282,7 +285,11 @@ const App = () => {
             {capturedImage && (
               <Image
                 source={{ uri: capturedImage }}
-                style={{ width: Dimensions.get('window').width-80, height: Dimensions.get('window').height-400, marginVertical: 20 }}
+                style={{
+                  width: Dimensions.get("window").width - 80,
+                  height: Dimensions.get("window").height - 400,
+                  marginVertical: 20,
+                }}
               />
             )}
             <Picker
@@ -298,6 +305,7 @@ const App = () => {
               <View>
                 <Text>Prediction: {prediction.predicted_class}</Text>
                 <Text>Confidence: {prediction.confidence.toFixed(2)}</Text>
+                <Button title="Detailed explanation" onPress={() => setCurrentView("detailedExplanation")}/>
               </View>
             )}
             <Button
@@ -310,6 +318,28 @@ const App = () => {
             />
           </View>
         );
+      case "detailedExplanation":
+        return (
+          <ScrollView style={{
+            width: Dimensions.get("window").width - 80,
+            height: Dimensions.get("window").height - 400,
+            marginVertical: 20,
+          }}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            <Text>Suggestions ahead:</Text>
+            <Text>{prediction.steps_ahead}</Text>
+            <Button
+              title="Home"
+              onPress={() => {
+                setCurrentView("home");
+                setImageUri(null);
+                setPrediction(null);
+              }}
+            />
+          </ScrollView>
+          
+        )
     }
   };
 
@@ -328,8 +358,8 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
     justifyContent: "space-between",
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height-200
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height - 200,
   },
   buttonContainer: {
     flexDirection: "row",

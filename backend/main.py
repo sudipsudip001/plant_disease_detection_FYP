@@ -6,21 +6,22 @@ import tensorflow as tf
 from PIL import Image
 import io
 import uvicorn
+import ollama
 
 PLANT_MODELS = {
     'potato': {
         'model': tf.keras.models.load_model('../model/potato.h5'),
-        'class_names': ['Potato early blight', 'Potato late blight', 'Healthy potato']
+        'class_names': ['Early blight', 'Late blight', 'Healthy']
     },
     'tomato': {
         'model': tf.keras.models.load_model('../model/tomato.h5'),
-        'class_names': ['Tomato bacterial spot', 'Tomato early blight', 'Tomato late blight', 'Tomato leaf mold', 'Tomato septoria leaf spot', 
-                            'Tomato two spotted spider mites', 'Tomato target spot', 'Tomato yellow leaf curl virus',
-                            'Tomato mosaic virus', 'Healthy tomato']
+        'class_names': ['Bacterial spot', 'Early blight', 'Late blight', 'Leaf mold', 'Septoria leaf spot', 
+                            'Two spotted spider mites', 'Target spot', 'Yellow leaf curl virus',
+                            'Mosaic virus', 'Healthy']
     },
     'pepper': {
         'model': tf.keras.models.load_model('../model/pepper.h5'),
-        'class_names': ['Pepper bell bacterial spot', 'Healthy pepper bell']
+        'class_names': ['Bacterial spot', 'Healthy']
     }
 }
 
@@ -56,6 +57,31 @@ def preprocess_image(file_bytes, target_size=(256, 256)):
 async def get_available_plants():
     return {"available_plants": list(PLANT_MODELS.keys())}
 
+#this function uses LLM, namely LLAMA 3.2 in order to give response to the user as an expert.
+def suggestions(plant, disease, confidence):
+    return ollama.chat(
+        model="llama3.2",
+        messages=[
+            {
+                "role": "user",
+                "content": f"As a plant pathologist, provide a concise explanation of early blight in potato plants. Part 1 - Disease Overview: - What is the specific pathogen causing early blight?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
+            }
+        ]
+    ).message.content
+
+@app.post("/chat")
+async def chat():
+    response = ollama.chat(
+        model="llama3.2",
+        messages=[
+            {
+                "role": "user",
+                "content": "Tell me an interesting fact about elephants",
+            },
+        ],
+    )
+    return response
+
 @app.post("/predict/{plant}")
 async def predict(plant: str, file: UploadFile = File(...)):
     print('file-received')
@@ -82,10 +108,15 @@ async def predict(plant: str, file: UploadFile = File(...)):
         predicted_class = class_names[np.argmax(predictions[0])]
         confidence = round(100 * np.max(predictions[0]), 2)
 
+        if(predicted_class == 'Healthy'):
+            response = "The plant is healthy so there's no need for further action."
+        else:
+            response = suggestions(plant, predicted_class, confidence)
         return {
             "plant": plant,
             "predicted_class": predicted_class, 
-            "confidence": confidence
+            "confidence": confidence,
+            "steps_ahead": response,
         }
     
     except Exception as e:
