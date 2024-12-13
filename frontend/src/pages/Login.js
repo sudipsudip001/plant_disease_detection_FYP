@@ -33,7 +33,16 @@ const Login = ({ navigation }) => {
         onChangeText={setPassword}
       />
       <Button title="Login" onPress={handleLogin} />
-    </View>
+            <Text style={styles.loginText}>
+            Create new Account Here {" "}
+            <Text
+              style={styles.loginLink}
+              onPress={() => navigation.navigate("Signup")}
+            >
+              Sign Up
+            </Text>
+            </Text>
+        </View>
   );
 };
 
@@ -54,6 +63,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     paddingLeft: 8,
+  },
+   loginText: {
+    marginTop: 20,
+    fontSize: 16,
+  },
+  loginLink: {
+    color: "blue",
   },
 });
 

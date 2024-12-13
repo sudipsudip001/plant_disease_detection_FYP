@@ -8,16 +8,19 @@ import Upload from "./src/pages/Upload";
 import Login from "./src/pages/Login";
 import Signup from "./src/pages/Signup";
 import Header from "./src/components/Header";
+import Profile from "./src/pages/Profile";
+import { useState } from "react";
 
 const Tab = createBottomTabNavigator();
 
 const App = () => {
+  const [isLoggedIn, setisLoggedIn] = useState(false);
   return (
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: true,
-          headerTitle: () => <Header />, // Use the Header component as the header title
+          headerTitle: () => <Header />, 
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
 
@@ -29,6 +32,8 @@ const App = () => {
               iconName = focused ? "log-in" : "log-in-outline"; // Icon for Login
             } else if (route.name === "Signup") {
               iconName = focused ? "person-add" : "person-add-outline"; // Icon for SignUp
+            } else if (route.name === "Profile") {
+              iconName = focused ? "person" : "person-outline";
             }
             // You can return any component that you like here!
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -47,8 +52,13 @@ const App = () => {
       >
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Upload" component={Upload} />
-        <Tab.Screen name="Login" component={Login} />
-        <Tab.Screen name="Signup" component={Signup} />
+        {isLoggedIn ? (
+        <Tab.Screen name="Profile" component={Profile} />) : (
+        <>
+          <Tab.Screen name="Login" component={Login} />
+          <Tab.Screen name="Signup" component={Signup} />
+        </>
+        )}
       </Tab.Navigator>
     </NavigationContainer>
   );
