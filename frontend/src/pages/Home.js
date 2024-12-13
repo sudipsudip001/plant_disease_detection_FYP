@@ -8,7 +8,7 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import Geolocation from "react-native-geolocation-service";
+import * as Location from "expo-location";
 import { mainHomeStyle } from "../styles/styles";
 
 const Home = ({ navigation }) => {
@@ -16,22 +16,23 @@ const Home = ({ navigation }) => {
   const [weatherData, setWeatherData] = useState(null);
 
   useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      fetchWeatherData(latitude, longitude);
+    })();
+
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 2000,
       useNativeDriver: true,
     }).start();
-
-    Geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        fetchWeatherData(latitude, longitude);
-      },
-      (error) => {
-        console.error(error);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    );
   }, [fadeAnim]);
 
   const fetchWeatherData = async (latitude, longitude) => {
