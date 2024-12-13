@@ -1,18 +1,5 @@
-// App.js
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons"; // Make sure to install @expo/vector-icons
-import Home from "./src/pages/Home";
-import Upload from "./src/pages/Upload";
-import Login from "./src/pages/Login";
-import Signup from "./src/pages/Signup";
-import Header from "./src/components/Header";
-
-const Tab = createBottomTabNavigator();
 import React, { useRef, useState } from "react";
 import {
-  ScrollView,
   View,
   Button,
   Image,
@@ -26,49 +13,15 @@ import * as ImagePicker from "expo-image-picker";
 import { Picker } from "@react-native-picker/picker";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import axios from "axios";
+import {
+  styles,
+  pickerStyle,
+  homeStyle,
+  permissionStyle,
+} from "../styles/styles";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const App = () => {
-  return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: true,
-          headerTitle: () => <Header />, // Use the Header component as the header title
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
-
-            if (route.name === "Home") {
-              iconName = focused ? "home" : "home-outline";
-            } else if (route.name === "Upload") {
-              iconName = focused ? "cloud-upload" : "cloud-upload-outline";
-            } else if (route.name === "Login") {
-              iconName = focused ? "log-in" : "log-in-outline"; // Icon for Login
-            } else if (route.name === "Signup") {
-              iconName = focused ? "person-add" : "person-add-outline"; // Icon for SignUp
-            }
-            // You can return any component that you like here!
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: "green",
-          tabBarInactiveTintColor: "gray",
-          tabBarStyle: {
-            paddingBottom: 5,
-            paddingTop: 5,
-            height: 60,
-          },
-          tabBarLabelStyle: {
-            fontSize: 12,
-          },
-        })}
-      >
-        <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="Upload" component={Upload} />
-        <Tab.Screen name="Login" component={Login} />
-        <Tab.Screen name="Signup" component={Signup} />
-      </Tab.Navigator>
-    </NavigationContainer>
-  );
-};
   const [imageUri, setImageUri] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [stats, setStats] = useState(null);
@@ -86,11 +39,12 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = "http://192.168.1.66:8000"; // change this ip address according to your device's ip address
+    val = "http://192.168.1.68:8000"; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }
 
+  //this function is imported from utils.js
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   }
@@ -101,15 +55,16 @@ const App = () => {
 
   if (!permission.granted) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.message}>
-          We need your permission to show the camera
+      <View style={permissionStyle.container}>
+        <Text style={permissionStyle.message}>
+          We need your permission to open the camera⚠️
         </Text>
         <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
   }
 
+  // function to take picture
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
@@ -128,12 +83,14 @@ const App = () => {
     }
   };
 
+  //function to retake picture
   const retakePicture = () => {
     setCapturedImage(null);
     setCameraActive(true);
     setCurrentView("camera");
   };
 
+  // function to check the status
   const statsCheck = async () => {
     try {
       const response = await axios.get(val);
@@ -143,6 +100,7 @@ const App = () => {
     }
   };
 
+  //function to select the image
   const selectImage = async () => {
     try {
       const permissionResult =
@@ -168,7 +126,7 @@ const App = () => {
     }
   };
 
-  //module for uploading image using camera
+  //function for uploading image using camera
   const uploadPhoto = async () => {
     const formData = new FormData();
     formData.append("file", {
@@ -177,7 +135,10 @@ const App = () => {
       name: "photo.jpg",
     });
     try {
-      const response = await axios.post(`${val}/predict/${selectedPlant}`, formData, {
+      const response = await axios.post(
+        `http://192.168.1.68:8000/predict/${selectedPlant}`,
+        formData,
+        {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -189,6 +150,7 @@ const App = () => {
     }
   };
 
+  //image upload and predict function
   const uploadImage = async () => {
     if (!imageUri) {
       console.error("Image URI is not set");
@@ -239,30 +201,43 @@ const App = () => {
     switch (currentView) {
       case "home":
         return (
-          <View>
-            <Button title="File" onPress={() => setCurrentView("upload")} />
-            <Button
-              title="Camera"
+          <View style={homeStyle.container}>
+            <TouchableOpacity
+              style={homeStyle.button}
+              onPress={() => setCurrentView("upload")}
+            >
+                <Icon name="file" size={18} color="white" />
+                <Text style={homeStyle.buttonText}>File </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={homeStyle.button}
               onPress={() => {
                 setCurrentView("camera");
                 setCameraActive(true);
               }}
-            />
-            <Button title="check endpoint" onPress={statsCheck} />
+            >
+              <Icon name="camera" size={20} color="white" />
+              <Text style={homeStyle.buttonText}> Camera </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={homeStyle.button} onPress={statsCheck}>
+              <Text style={homeStyle.buttonText}>Check Endpoint</Text>
+            </TouchableOpacity>
             {stats && (
-              <View>
-                <Text>status: {stats.data.status}</Text>
+              <View style={homeStyle.statusContainer}>
+                <Text style={homeStyle.statusText}>
+                  Status: {stats.data.status}
+                </Text>
               </View>
             )}
           </View>
         );
       case "upload":
         return (
-          <View>
+          <View style={pickerStyle.container}>
             <Button title="Select Image" onPress={selectImage} />
             <Picker
               selectedValue={selectedPlant}
-              style={{ height: 50, width: 150 }}
+              style={pickerStyle.picker}
               onValueChange={(itemValue) => setSelectedPlant(itemValue)}
             >
               <Picker.Item label="Potato" value="potato" />
@@ -270,17 +245,17 @@ const App = () => {
               <Picker.Item label="Pepper" value="pepper" />
             </Picker>
             {imageUri && (
-              <Image
-                source={{ uri: imageUri.uri }}
-                style={{ width: 200, height: 200, marginVertical: 20 }}
-              />
+              <Image source={{ uri: imageUri.uri }} style={pickerStyle.image} />
             )}
             <Button title="Predict" onPress={uploadImage} />
             {prediction && (
-              <View>
-                <Text>Prediction: {prediction.predicted_class}</Text>
-                <Text>Confidence: {prediction.confidence.toFixed(2)}</Text>
-                <Button title="Detailed explanation" onPress={()=> setCurrentView("detailedExplanation")}/>
+              <View style={pickerStyle.predictionContainer}>
+                <Text style={pickerStyle.predictionText}>
+                  Prediction: {prediction.predicted_class}
+                </Text>
+                <Text style={pickerStyle.predictionText}>
+                  Confidence: {prediction.confidence.toFixed(2)}
+                </Text>
               </View>
             )}
             <Button
@@ -290,6 +265,7 @@ const App = () => {
                 setImageUri(null);
                 setPrediction(null);
               }}
+              style = {pickerStyle.button}
             />
           </View>
         );
@@ -358,7 +334,6 @@ const App = () => {
               <View>
                 <Text>Prediction: {prediction.predicted_class}</Text>
                 <Text>Confidence: {prediction.confidence.toFixed(2)}</Text>
-                <Button title="Detailed explanation" onPress={() => setCurrentView("detailedExplanation")}/>
               </View>
             )}
             <Button
@@ -371,28 +346,6 @@ const App = () => {
             />
           </View>
         );
-      case "detailedExplanation":
-        return (
-          <ScrollView style={{
-            width: Dimensions.get("window").width - 80,
-            height: Dimensions.get("window").height - 400,
-            marginVertical: 20,
-          }}
-            contentContainerStyle={{ flexGrow: 1 }}
-          >
-            <Text>Suggestions ahead:</Text>
-            <Text>{prediction.steps_ahead}</Text>
-            <Button
-              title="Home"
-              onPress={() => {
-                setCurrentView("home");
-                setImageUri(null);
-                setPrediction(null);
-              }}
-            />
-          </ScrollView>
-          
-        )
     }
   };
 
@@ -403,47 +356,9 @@ const App = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  camera: {
-    flex: 1,
-    justifyContent: "space-between",
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height - 200,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    backgroundColor: "transparent",
-    margin: 16,
-  },
-  button: {
-    alignSelf: "flex-end",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 18,
-    color: "white",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 10,
-    borderRadius: 10,
-  },
-  captureButtonContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  captureButton: {
-    backgroundColor: "white",
-    borderRadius: 50,
-    padding: 15,
-    paddingHorizontal: 30,
-  },
-  captureButtonText: {
-    color: "black",
-    fontSize: 18,
-  },
-});
+
+
 
 export default App;
+
+
