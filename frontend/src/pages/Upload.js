@@ -43,7 +43,7 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = "http://192.168.1.68:8000"; // change this ip address according to your device's ip address
+    val = "http://192.168.1.66:8000"; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }
@@ -153,6 +153,7 @@ const App = () => {
 
   //function for uploading image using camera
   const uploadPhoto = async () => {
+    console.log('clicked');
     const formData = new FormData();
     formData.append("file", {
       uri: capturedImage,
@@ -192,14 +193,17 @@ const App = () => {
 
       final = `${val}/predict/${selectedPlant}`; // note that '/' at the end of the url can cause errors.
       try {
+        console.log("got clicked");
+           console.log("Sending request to:", final);
         const response = await axios.post(final, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
+        console.log("clicked again");
         setPrediction(response.data);
       } catch (error) {
-        console.log("There was an error.", error);
+        console.log("There was an error on mobile.", error.message);
       }
     } else {
       try {
@@ -215,6 +219,7 @@ const App = () => {
           },
           timeout: 10000,
         });
+        console.log(response.data);
         setPrediction(response.data);
       } catch (error) {
         console.log("error");
