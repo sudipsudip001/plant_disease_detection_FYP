@@ -7,7 +7,7 @@ from PIL import Image
 import io
 import uvicorn
 import ollama
-
+from pydantic import BaseModel
 
 #loading models
 PLANT_MODELS = {
@@ -62,30 +62,26 @@ def preprocess_image(file_bytes, target_size=(256, 256)):
 async def get_available_plants():
     return {"available_plants": list(PLANT_MODELS.keys())}
 
-#this function uses LLM, namely LLAMA 3.2 in order to give response to the user as an expert.
-def suggestions(plant, disease, confidence):
+#for LLM response
+class chatValues(BaseModel):
+    plant: str
+    disease: str
+
+@app.post("/chat")
+async def chat(plantInfo: chatValues):
+    plant = plantInfo.plant
+    disease = plantInfo.disease
+    if disease == "Healthy":
+        return "No actions needed as the plant is already healthy."
     return ollama.chat(
         model="llama3.2",
         messages=[
             {
                 "role": "user",
-                "content": f"As a plant pathologist, provide a concise explanation of early blight in potato plants. Part 1 - Disease Overview: - What is the specific pathogen causing early blight?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
+                "content": f"As a plant pathologist, provide a concise explanation of {disease} in {plant}. Part 1 - Disease Overview: - What is the specific pathogen causing {disease}?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
             }
-        ]
-    ).message.content
-
-@app.post("/chat")
-async def chat():
-    response = ollama.chat(
-        model="llama3.2",
-        messages=[
-            {
-                "role": "user",
-                "content": "Tell me an interesting fact about elephants",
-            },
         ],
-    )
-    return response
+    ).message.content
 
 @app.post("/predict/{plant}")
 async def predict(plant: str, file: UploadFile = File(...)):
@@ -113,15 +109,10 @@ async def predict(plant: str, file: UploadFile = File(...)):
         predicted_class = class_names[np.argmax(predictions[0])]
         confidence = round(100 * np.max(predictions[0]), 2)
 
-        if(predicted_class == 'Healthy'):
-            response = "The plant is healthy so there's no need for further action."
-        else:
-            response = suggestions(plant, predicted_class, confidence)
         return {
             "plant": plant,
             "predicted_class": predicted_class, 
             "confidence": confidence,
-            "steps_ahead": response,
         }
     
     except Exception as e:

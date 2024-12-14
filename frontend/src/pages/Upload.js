@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import {
   View,
+  ScrollView,
   Button,
   Image,
   Text,
@@ -36,6 +37,9 @@ const App = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [capturedImage, setCapturedImage] = useState(null);
+
+  //for LLM response
+  const [LLMResponse, setLLMResponse] = useState(null);
 
   let val;
   if (Platform.OS === "android") {
@@ -90,13 +94,34 @@ const App = () => {
     setCurrentView("camera");
   };
 
-  // function to check the status
+  //function to check the status
   const statsCheck = async () => {
     try {
       const response = await axios.get(val);
       setStats(response);
     } catch (error) {
       console.log("Error checking endpoint:", error.message);
+    }
+  };
+
+  //function to promplt the LLM
+  const promptTheLLM = async(plant, disease) => {
+    try{
+      const data = {
+        plant: plant,
+        disease: disease,
+      }
+      const response = await axios.post(`${val}/chat`, data, 
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setLLMResponse(response.data);
+      setCurrentView("detailedDescription");
+    }catch(error){
+      console.error("There was an error in the process: ", error);
     }
   };
 
@@ -136,7 +161,7 @@ const App = () => {
     });
     try {
       const response = await axios.post(
-        `http://192.168.1.68:8000/predict/${selectedPlant}`,
+        `${val}/predict/${selectedPlant}`,
         formData,
         {
           headers: {
@@ -256,6 +281,7 @@ const App = () => {
                 <Text style={pickerStyle.predictionText}>
                   Confidence: {prediction.confidence.toFixed(2)}
                 </Text>
+                <Button title="Details" onPress={()=>promptTheLLM(selectedPlant, prediction.predicted_class)} />
               </View>
             )}
             <Button
@@ -334,6 +360,7 @@ const App = () => {
               <View>
                 <Text>Prediction: {prediction.predicted_class}</Text>
                 <Text>Confidence: {prediction.confidence.toFixed(2)}</Text>
+                <Button title="Details" onPress={()=>promptTheLLM(selectedPlant, prediction.predicted_class)} />
               </View>
             )}
             <Button
@@ -346,6 +373,21 @@ const App = () => {
             />
           </View>
         );
+      case "detailedDescription":
+        return (
+          <ScrollView>
+            <Text>Steps ahead:</Text>
+            <Text>{LLMResponse}</Text>
+            <Button
+              title="Home"
+              onPress={() => {
+                setCurrentView("home");
+                setImageUri(null);
+                setPrediction(null);
+              }}
+            />
+          </ScrollView>
+        )
     }
   };
 
@@ -355,10 +397,4 @@ const App = () => {
     </View>
   );
 };
-
-
-
-
 export default App;
-
-
