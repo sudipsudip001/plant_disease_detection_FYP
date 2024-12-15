@@ -6,23 +6,24 @@ import tensorflow as tf
 from PIL import Image
 import io
 import uvicorn
-
+import ollama
+from pydantic import BaseModel
 
 #loading models
 PLANT_MODELS = {
     'potato': {
         'model': tf.keras.models.load_model('../model/potato.h5'),
-        'class_names': ['Potato early blight', 'Potato late blight', 'Healthy potato']
+        'class_names': ['Early blight', 'Late blight', 'Healthy']
     },
     'tomato': {
         'model': tf.keras.models.load_model('../model/tomato.h5'),
-        'class_names': ['Tomato bacterial spot', 'Tomato early blight', 'Tomato late blight', 'Tomato leaf mold', 'Tomato septoria leaf spot', 
-                            'Tomato two spotted spider mites', 'Tomato target spot', 'Tomato yellow leaf curl virus',
-                            'Tomato mosaic virus', 'Healthy tomato']
+        'class_names': ['Bacterial spot', 'Early blight', 'Late blight', 'Leaf mold', 'Septoria leaf spot', 
+                            'Two spotted spider mites', 'Target spot', 'Yellow leaf curl virus',
+                            'Mosaic virus', 'Healthy']
     },
     'pepper': {
         'model': tf.keras.models.load_model('../model/pepper.h5'),
-        'class_names': ['Pepper bell bacterial spot', 'Healthy pepper bell']
+        'class_names': ['Bacterial spot', 'Healthy']
     }
 }
 
@@ -61,6 +62,27 @@ def preprocess_image(file_bytes, target_size=(256, 256)):
 async def get_available_plants():
     return {"available_plants": list(PLANT_MODELS.keys())}
 
+#for LLM response
+class chatValues(BaseModel):
+    plant: str
+    disease: str
+
+@app.post("/chat")
+async def chat(plantInfo: chatValues):
+    plant = plantInfo.plant
+    disease = plantInfo.disease
+    if disease == "Healthy":
+        return "No actions needed as the plant is already healthy."
+    return ollama.chat(
+        model="llama3.2",
+        messages=[
+            {
+                "role": "user",
+                "content": f"As a plant pathologist, provide a concise explanation of {disease} in {plant}. Part 1 - Disease Overview: - What is the specific pathogen causing {disease}?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
+            }
+        ],
+    ).message.content
+
 @app.post("/predict/{plant}")
 async def predict(plant: str, file: UploadFile = File(...)):
     print('file-received')
@@ -90,7 +112,7 @@ async def predict(plant: str, file: UploadFile = File(...)):
         return {
             "plant": plant,
             "predicted_class": predicted_class, 
-            "confidence": confidence
+            "confidence": confidence,
         }
     
     except Exception as e:
