@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Request, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 import numpy as np
 import tensorflow as tf
 from PIL import Image
 import io
 import uvicorn
 import ollama
+from ollama import AsyncClient
 from pydantic import BaseModel
 
 #loading models
@@ -67,24 +68,29 @@ class chatValues(BaseModel):
     plant: str
     disease: str
 
-@app.post("/chat")
-async def chat(plantInfo: chatValues):
-    plant = plantInfo.plant
-    disease = plantInfo.disease
-    if disease == "Healthy":
-        return "No actions needed as the plant is already healthy."
+async def generate_llm_response(plant: str, disease: str):
+    async_client = AsyncClient()
+    message = {
+        "role": "user",
+        "content": f"Explain {disease} in {plant} comprehensively..."  # Your detailed prompt
+    }
+    
     try:
-        return ollama.chat(
-            model="llama3.2",
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"As a plant pathologist, provide a concise explanation of {disease} in {plant}. Part 1 - Disease Overview: - What is the specific pathogen causing {disease}?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
-                }
-            ],
-        ).message.content
+        async for part in await async_client.chat(
+            model="llama3.2", 
+            messages=[message], 
+            stream=True
+        ):
+            yield f"data: {part['message']['content']}\n\n"
     except Exception as e:
-        print(f"Error occured in accessing the LLM: ", e)
+        yield f"data: Error: {str(e)}\n\n"
+
+@app.post("/chat")
+async def chat_stream(plantInfo: chatValues):
+    return StreamingResponse(
+        generate_llm_response(plantInfo.plant, plantInfo.disease), 
+        media_type="text/event-stream"
+    )
 
 @app.post("/predict/{plant}")
 async def predict(plant: str, file: UploadFile = File(...)):
