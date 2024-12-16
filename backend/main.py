@@ -73,15 +73,18 @@ async def chat(plantInfo: chatValues):
     disease = plantInfo.disease
     if disease == "Healthy":
         return "No actions needed as the plant is already healthy."
-    return ollama.chat(
-        model="llama3.2",
-        messages=[
-            {
-                "role": "user",
-                "content": f"As a plant pathologist, provide a concise explanation of {disease} in {plant}. Part 1 - Disease Overview: - What is the specific pathogen causing {disease}?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
-            }
-        ],
-    ).message.content
+    try:
+        return ollama.chat(
+            model="llama3.2",
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"As a plant pathologist, provide a concise explanation of {disease} in {plant}. Part 1 - Disease Overview: - What is the specific pathogen causing {disease}?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
+                }
+            ],
+        ).message.content
+    except Exception as e:
+        print(f"Error occured in accessing the LLM: ", e)
 
 @app.post("/predict/{plant}")
 async def predict(plant: str, file: UploadFile = File(...)):
