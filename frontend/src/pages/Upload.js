@@ -47,7 +47,7 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = "http://192.168.1.68:8000"; // change this ip address according to your device's ip address
+    val = "http://192.168.1.66:8000"; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }
@@ -106,7 +106,7 @@ const App = () => {
       setStats(response);
     } catch (error) {
       console.log("Error checking endpoint:", error.message);
-    } finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -128,7 +128,7 @@ const App = () => {
       setCurrentView("detailedDescription");
     } catch (error) {
       console.error("There was an error in the process: ", error);
-    } finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -195,7 +195,7 @@ const App = () => {
         console.log(`${val}/predict/${selectedPlant}`);
         console.log("There was an error: ", error);
       }
-    } finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -238,7 +238,7 @@ const App = () => {
           console.error("Error name: ", error.name);
           console.error("Error code: ", error.code);
         }
-      } finally{
+      } finally {
         setIsLoading(false);
       }
     } else {
@@ -258,7 +258,7 @@ const App = () => {
         setPrediction(response.data);
       } catch (error) {
         console.log("error");
-      } finally{
+      } finally {
         setIsLoading(false);
       }
     }
@@ -321,7 +321,11 @@ const App = () => {
                   Prediction: {prediction.predicted_class}
                 </Text>
                 <Text style={pickerStyle.predictionText}>
-                  Confidence: {prediction.confidence.toFixed(2)}
+                  {prediction.confidence && (
+                    <Text>
+                      Confidence: {prediction?.confidence?.toFixed(2)}
+                    </Text>
+                  )}
                 </Text>
                 <Button
                   title="Details"
@@ -410,8 +414,12 @@ const App = () => {
             </Picker>
             {prediction && (
               <View>
-                <Text>Prediction: {prediction.predicted_class}</Text>
-                <Text>Confidence: {prediction.confidence.toFixed(2)}</Text>
+                <Text>Prediction: {prediction?.predicted_class}</Text>
+                {prediction.confidence && (
+                  <Text>
+                    <Text>Confidence: {prediction?.confidence.toFixed(2)}</Text>
+                  </Text>
+                )}
                 <Button
                   title="Details"
                   onPress={() => {
