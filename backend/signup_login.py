@@ -1,13 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException
-from pydantic import BaseModel, EmailStr 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from database import get_db, database
 from models import User
-import uvicorn
+from schemas import UserCreate, UserOut, UserLogin
+from auth import validate_password_strength
 from passlib.context import CryptContext
 
 
+# Initialize FastAPI app
 app = FastAPI()
 
 
@@ -21,47 +22,42 @@ async def test_connection():
         return {"status": "Connection failed", "error": str(e)}
 
 
-# Set up Passlib context for bcrypt
+# handles password hashing configuration using passlib
 pwd_context = CryptContext (schemes=["bcrypt"], deprecated="auto")
  
 
-# Pydantic models for request data validation
-class UserSignup(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
 
-# Endpoint for Signup
-@app.post("/signup")
-async def signup(user: UserSignup, db: AsyncSession = Depends(get_db)):
+# Endpoint to create a new user (Signup)
+@app.post("/signup", response_model=UserOut)
+async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
     # Check if email already exists
     result = await db.execute(select(User).where(User.email == user.email))
     existing_user = result.scalars().first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    
+    # Validate password strength
+    validate_password_strength(user.password)  # Validate password before hashing
+
     # Hash the password
     hashed_password = pwd_context.hash(user.password)
 
-    # Create and add new user to the database
+    # Create a new user instance
     new_user = User(
-                    username=user.username, 
-                    email=user.email, 
-                    password=hashed_password
-                    )
-
+        username=user.username,
+        email=user.email,
+        password=hashed_password
+    )
+    
+    # Add user to the database
     db.add(new_user)
     await db.commit()
-
-    return {"message": "User created successfully"}
     
+    return new_user
 
-# Endpoint for Login
+
+# Endpoint for user login
 @app.post("/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     # Check if user exists
@@ -69,36 +65,25 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
     existing_user = result.scalars().first()
     if not existing_user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
-    
-    # Verify the password against the hashed password stored in the database
+
+    # Verify the password
     if not pwd_context.verify(user.password, existing_user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
-
 
     return {"message": "Login successful"}
 
 
-# Endpoint to list all usernames
-@app.get("/users")
-async def list_usernames(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User))
-    users = result.scalars().all()
-    usernames = [user.username for user in users]
-    return {"usernames": usernames}
-
-
-
-#HEalth-Check
+# Health-check endpoint
 @app.get("/")
 async def health_check():
-    return {"Welcome to plant app"}
+    return {"message": "Welcome to the Plant Disease Detection App!"}
 
 
-#to run the file
+# To run the application
 if __name__ == "__main__":
-    uvicorn.run("signup_login:app",
-    host="0.0.0.0",
-    port=8001,
-    reload=True
-)
+    import uvicorn
+    uvicorn.run(
+        "signup_login:app", host="0.0.0.0", port=8001, reload=True
+    )
+
 # uvicorn signup_login:app --host 0.0.0.0 --port 8001 --reload # to run the application
