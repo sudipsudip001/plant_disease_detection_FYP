@@ -9,6 +9,7 @@ import DetailedDescription from "./Main/DetailedDescription";
 import CaptureCamera from "./Main/CaptureCamera";
 import Camerar from "./Main/Camerar";
 import Uploaded from "./Main/Uploaded";
+import Chat from "./Main/Chat";
 
 const App = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -292,6 +293,15 @@ const App = () => {
             selectedPlant={selectedPlant}
             setSelectedPlant={setSelectedPlant}
             prediction={prediction}
+            setPrediction={setPrediction}
+          />
+        );
+      case "chat":
+        return (
+          <Chat
+            setCurrentView={setCurrentView}
+            setImageUri={setImageUri}
+            setSelectedPlant={setSelectedPlant}
             setPrediction={setPrediction}
           />
         );
