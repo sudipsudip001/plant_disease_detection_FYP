@@ -35,17 +35,26 @@ const Uploaded = ({
       {prediction && (
         <View style={pickerStyle.predictionContainer}>
           <Text style={pickerStyle.predictionText}>
-            Prediction: {prediction.predicted_class}
+            {prediction.predicted_class ===
+            "Please input the image of a leaf" ? (
+              <Text>{prediction.predicted_class}</Text>
+            ) : (
+              <Text>Prediction: {prediction.predicted_class}</Text>
+            )}
           </Text>
           <Text style={pickerStyle.predictionText}>
             {prediction.confidence && (
               <Text>Confidence: {prediction?.confidence?.toFixed(2)}</Text>
             )}
           </Text>
-          <Button
-            title="Details"
-            onPress={() => setCurrentView("detailedDescription")}
-          />
+          {prediction.predicted_class === "Please input the image of a leaf" ? (
+            <></>
+          ) : (
+            <Button
+              title="Details"
+              onPress={() => setCurrentView("detailedDescription")}
+            />
+          )}
         </View>
       )}
       <Button

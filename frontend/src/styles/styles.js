@@ -1,5 +1,5 @@
 // styles.js
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, Platform } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -64,6 +64,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
   },
+  predictionText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   camera: {
     flex: 1,
     justifyContent: "space-between",
@@ -101,16 +105,16 @@ export const styles = StyleSheet.create({
     fontSize: 18,
   },
   loading: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    pointerEvents: 'none',
-    backgroundColor: '#F5FCFF88'
-  }
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "none",
+    backgroundColor: "#F5FCFF88",
+  },
 });
 
 export const pickerStyle = StyleSheet.create({
@@ -140,6 +144,17 @@ export const pickerStyle = StyleSheet.create({
   },
   button: {
     marginVertical: 10,
+  },
+  loading: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "none",
+    backgroundColor: "#F5FCFF88",
   },
 });
 
@@ -216,5 +231,98 @@ export const permissionStyle = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+});
+
+export const detailStyle = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    paddingTop: Platform.OS === "ios" ? 0 : 25,
+  },
+  header: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000000",
+    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+  },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  status: {
+    fontSize: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    overflow: "hidden",
+    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+  },
+  connected: {
+    backgroundColor: "#E8F5E9",
+    color: "#2E7D32",
+  },
+  disconnected: {
+    backgroundColor: "#FFEBEE",
+    color: "#C62828",
+  },
+  errorContainer: {
+    backgroundColor: "#FFEBEE",
+    padding: 15,
+    margin: 10,
+    borderRadius: 8,
+  },
+  error: {
+    color: "#C62828",
+    fontSize: 14,
+    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 10,
+    paddingBottom: 20,
+  },
+  messageContainer: {
+    backgroundColor: "#F5F5F5",
+    padding: 15,
+    marginVertical: 5,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: "#2196F3",
+    maxWidth: width - 20,
+  },
+  messageContent: {
+    fontSize: 16,
+    color: "#000000",
+    lineHeight: 24,
+    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+    textAlign: "left",
+  },
+  cursor: {
+    color: "#2196F3",
+    fontWeight: "bold",
+    opacity: 0.7,
   },
 });

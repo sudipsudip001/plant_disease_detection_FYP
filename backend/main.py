@@ -93,9 +93,42 @@ async def generate_llm_response(plant: str, disease: str) -> AsyncGenerator[str,
         yield "event: close\ndata: Stream completed\n\n"
 
 @app.get("/chat")
-async def chat_stream(reqest: Request, plant: str, disease: str):
+async def chat_stream(request: Request, plant: str, disease: str):
     return StreamingResponse(
         generate_llm_response(plant, disease), 
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "text/event-stream"
+        }
+    )
+
+async def converse(question: str) -> AsyncGenerator[str, None]:
+    async_client = AsyncClient()
+    message = {
+        "role": "user",
+        "content": f"As a supportive agent, provide the answer to the question: {question} in short, concise and informative way.",
+    }
+
+    try:
+        async for part in await async_client.chat(
+            model="llama3.2",
+            messages=[message],
+            stream=True
+        ):
+            data = json.dumps({"content": part['message']['content']})
+            yield f"data: {data}\n\n"
+    except Exception as e:
+        error_data = json.dumps({"error": str(e)})
+        yield f"data: {error_data}\n\n"
+    finally:
+        yield "event: close\ndata: Stream completed\n\n"
+
+@app.get("/converse")
+async def talk(request: Request, question: str):
+    return StreamingResponse(
+        converse(question),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
@@ -160,9 +193,7 @@ async def predict(plant: str, file: UploadFile = File(...)):
             }
         else:
             return {
-                # "plant": "None",
                 "predicted_class": "Please input the image of a leaf",
-                # "confidence": 100.0,
             }
     
     except Exception as e:

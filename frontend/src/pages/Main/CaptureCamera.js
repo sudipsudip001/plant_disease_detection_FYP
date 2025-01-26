@@ -50,18 +50,29 @@ function CaptureCamera({
       </Picker>
       {prediction && (
         <View>
-          <Text>Prediction: {prediction?.predicted_class}</Text>
+          <Text style={styles.predictionText}>
+            {prediction.predicted_class ===
+            "Please input the image of a leaf" ? (
+              <Text>{prediction.predicted_class}</Text>
+            ) : (
+              <Text>Prediction: {prediction?.predicted_class}</Text>
+            )}
+          </Text>
           {prediction.confidence && (
             <Text>
               <Text>Confidence: {prediction?.confidence.toFixed(2)}</Text>
             </Text>
           )}
-          <Button
-            title="Details"
-            onPress={() => {
-              setCurrentView("detailedDescription");
-            }}
-          />
+          {prediction.predicted_class === "Please input the image of a leaf" ? (
+            <></>
+          ) : (
+            <Button
+              title="Details"
+              onPress={() => {
+                setCurrentView("detailedDescription");
+              }}
+            />
+          )}
         </View>
       )}
       <Button
