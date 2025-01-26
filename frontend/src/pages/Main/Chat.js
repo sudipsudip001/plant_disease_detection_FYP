@@ -1,24 +1,22 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   SafeAreaView,
+  Button,
   Text,
-  ScrollView,
   View,
   ActivityIndicator,
-  Button,
+  ScrollView,
+  TextInput,
 } from "react-native";
 import RNEventSource from "react-native-event-source";
 import { detailStyle } from "../../styles/styles";
 
-const DetailedDescription = ({
-  val,
+function Chat({
   setCurrentView,
   setImageUri,
-  selectedPlant,
   setSelectedPlant,
-  prediction,
   setPrediction,
-}) => {
+}) {
   const [currentMessage, setCurrentMessage] = useState("");
   const [error, setError] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -29,32 +27,28 @@ const DetailedDescription = ({
 
   const [startSSE, setStartSSE] = useState(false);
 
-  function Nullifier() {
-    setCurrentMessage("");
-    setError("");
-    setIsConnected(false);
-    setIsLoading(false);
-    setIsStreamComplete(false);
-    setStartSSE(false);
+  const val = "http://192.168.1.71:8000";
+  //to control the input state
+  const [message, setMessage] = useState("");
 
+  function Nullifier() {
+    setCurrentView("home");
     setImageUri(null);
     setSelectedPlant("potato");
     setPrediction(null);
   }
 
-  const connectToSSE = (plant, disease) => {
+  const connectToSSE = (question) => {
     setIsLoading(true);
     try {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
 
-      const url = `${val}/chat?plant=${encodeURIComponent(
-        plant
-      )}&disease=${encodeURIComponent(disease)}`;
+      const url = `${val}/converse?question=${encodeURIComponent(question)}`;
 
       setIsLoading(true);
-      setCurrentMessage(""); // Reset current message
+      setCurrentMessage("");
       setIsStreamComplete(false);
 
       eventSourceRef.current = new RNEventSource(url, {
@@ -91,11 +85,11 @@ const DetailedDescription = ({
 
           setCurrentMessage((prev) => prev + newContent);
 
-          // Scroll to bottom when new content arrives
           scrollViewRef.current?.scrollToEnd({ animated: true });
         } catch (e) {
           if (event.data.includes("Stream completed")) {
             setIsStreamComplete(true);
+            setStartSSE(false);
             setIsConnected(false);
             eventSourceRef.current?.close();
             return;
@@ -109,14 +103,16 @@ const DetailedDescription = ({
       eventSourceRef.current.addEventListener("close", () => {
         setIsConnected(false);
         setIsStreamComplete(true);
+        setStartSSE(false);
         eventSourceRef.current?.close();
       });
 
       eventSourceRef.current.addEventListener("error", (err) => {
         setIsConnected(false);
-        setError(String(err.message || "Connection error. Please try again."));
+        setError(String(err.message || "Connection error. Please try again"));
         setIsLoading(false);
         setIsStreamComplete(true);
+        setStartSSE(false);
         eventSourceRef.current?.close();
       });
     } catch (e) {
@@ -124,12 +120,13 @@ const DetailedDescription = ({
       setError(String(e.message || "Failed to establish connection"));
       setIsLoading(false);
       setIsStreamComplete(true);
+      setStartSSE(false);
     }
   };
 
   useEffect(() => {
     if (startSSE) {
-      connectToSSE(selectedPlant, prediction.predicted_class);
+      connectToSSE(message);
     }
 
     return () => {
@@ -138,26 +135,22 @@ const DetailedDescription = ({
       }
     };
   }, [startSSE]);
-
   return (
     <SafeAreaView style={detailStyle.container}>
       <View style={detailStyle.header}>
-        {!isStreamComplete && (
-          <Button
-            onPress={() => {
-              setStartSSE(true);
-            }}
-            title="Details"
-          />
-        )}
         <Button
           onPress={() => {
-            setCurrentView("home");
+            setStartSSE(true);
+          }}
+          title="🦙"
+        />
+        <Button
+          onPress={() => {
             Nullifier();
           }}
           title="Home"
         />
-        <Text style={detailStyle.title}>Plant Disease Analysis</Text>
+        <Text style={detailStyle.title}>Converse with LLAMA</Text>
         <View style={detailStyle.statusContainer}>
           {isLoading ? (
             <ActivityIndicator size="small" color="#2196F3" />
@@ -168,18 +161,23 @@ const DetailedDescription = ({
                 isConnected ? detailStyle.connected : detailStyle.disconnected,
               ]}
             >
-              {isConnected ? "Connected" : "Disconnected"}
+              .
             </Text>
           )}
         </View>
       </View>
-
       {error !== "" && (
         <View style={detailStyle.errorContainer}>
           <Text style={detailStyle.error}>{error}</Text>
         </View>
       )}
-
+      <TextInput
+        style={detailStyle.input}
+        value={message}
+        onChangeText={(text) => setMessage(text)}
+        onSubmitEditing={() => console.warn("Message edited")}
+        placeholder="Type in message..."
+      />
       <ScrollView
         ref={scrollViewRef}
         style={detailStyle.scrollView}
@@ -194,14 +192,8 @@ const DetailedDescription = ({
           </Text>
         </View>
       </ScrollView>
-
-      {isStreamComplete && (
-        <View>
-          <Button title="Chat further" onPress={() => setCurrentView("chat")} />
-        </View>
-      )}
     </SafeAreaView>
   );
-};
+}
 
-export default DetailedDescription;
+export default Chat;
