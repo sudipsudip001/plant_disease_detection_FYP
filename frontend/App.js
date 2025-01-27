@@ -5,10 +5,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons"; // Make sure to install @expo/vector-icons
 import Home from "./src/pages/Home";
 import Upload from "./src/pages/Upload";
-import Login from "./src/pages/Login";
-import Signup from "./src/pages/Signup";
+import Auth from "./src/pages/Auth";
 import Header from "./src/components/Header";
 import Profile from "./src/pages/Profile";
+import Consults from "./src/pages/Consults";
 import { useState } from "react";
 
 const Tab = createBottomTabNavigator();
@@ -20,20 +20,18 @@ const App = () => {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: true,
-          headerTitle: () => <Header />, 
+          headerTitle: () => <Header />,
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
 
             if (route.name === "Home") {
               iconName = focused ? "home" : "home-outline";
-            } else if (route.name === "Upload") {
-              iconName = focused ? "cloud-upload" : "cloud-upload-outline";
-            } else if (route.name === "Login") {
-              iconName = focused ? "log-in" : "log-in-outline"; // Icon for Login
-            } else if (route.name === "Signup") {
-              iconName = focused ? "person-add" : "person-add-outline"; // Icon for SignUp
+            } else if (route.name === "Predict") {
+              iconName = focused ? "stats-chart" : "stats-chart-outline";
+            } else if (route.name === "Consults") {
+              iconName = focused ? "bulb" : "bulb-outline"; // Icon for Consults
             } else if (route.name === "Profile") {
-              iconName = focused ? "person" : "person-outline";
+              iconName = focused ? "person" : "person-outline"; // Icon for Login
             }
             // You can return any component that you like here!
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -44,20 +42,21 @@ const App = () => {
             paddingBottom: 5,
             paddingTop: 5,
             height: 60,
-          },
+          }, 
           tabBarLabelStyle: {
             fontSize: 12,
           },
         })}
       >
         <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="Upload" component={Upload} />
+        <Tab.Screen name="Predict" component={Upload} />
         {isLoggedIn ? (
-        <Tab.Screen name="Profile" component={Profile} />) : (
-        <>
-          <Tab.Screen name="Login" component={Login} />
-          <Tab.Screen name="Signup" component={Signup} />
-        </>
+          <Tab.Screen name="Profile" component={Profile} />
+        ) : (
+          <>
+          <Tab.Screen name="Consults" component={Consults} />
+          <Tab.Screen name="Profile" component={Auth} />
+          </>
         )}
       </Tab.Navigator>
     </NavigationContainer>

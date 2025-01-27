@@ -19,11 +19,10 @@ const Header = () => {
 
   return (
     <View style={styles.headerContainer}>
-      <Text
-        onPress={() => navigation.navigate("Home")}
-        style={styles.dateTimeText}
-      >
-        {formatDateTime(currentDateTime)}
+      <Text style={styles.headerText}>
+        <Text style={styles.letter}>P</Text>
+        <Text style={styles.letter}>D</Text>
+        <Text style={styles.letter}>P</Text>
       </Text>
     </View>
   );
@@ -31,9 +30,19 @@ const Header = () => {
 
 const styles = StyleSheet.create({
 
-  dateTimeText: {
-    fontSize: 13,
-    fontWeight: "bold",
+   headerContainer: {
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    fontSize: 12,
+    fontWeight: 'bolder',
+    color: '#333',
+    cursor:'pointer',
+  },
+  letter: {
+    marginHorizontal: 2,
   },
 });
 

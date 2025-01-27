@@ -21,7 +21,7 @@ export const mainHomeStyle = StyleSheet.create({
     resizeMode: "cover", // Cover the entire screen
   },
   weatherContainer: {
-    flex: 1,
+    flex:1,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -234,95 +234,87 @@ export const permissionStyle = StyleSheet.create({
   },
 });
 
+export const consultStyle = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  // button: {
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 20,
+  //   backgroundColor: "black",
+  //   borderRadius: 5,
+  //   alignItems: "center",
+  //   color: "white",
+  //   fontSize: 16,
+  //   fontWeight: "bold",
+  // },
+  content: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+});
+
 export const detailStyle = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    paddingTop: Platform.OS === "ios" ? 0 : 25,
+    padding: 10,
   },
   header: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#000000",
-    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
   },
   statusContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
   status: {
-    fontSize: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    overflow: "hidden",
-    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+    fontSize: 16,
   },
   connected: {
-    backgroundColor: "#E8F5E9",
-    color: "#2E7D32",
+    color: "green",
   },
   disconnected: {
-    backgroundColor: "#FFEBEE",
-    color: "#C62828",
+    color: "red",
   },
   errorContainer: {
-    backgroundColor: "#FFEBEE",
-    padding: 15,
-    margin: 10,
-    borderRadius: 8,
+    padding: 10,
+    backgroundColor: "red",
   },
   error: {
-    color: "#C62828",
-    fontSize: 14,
-    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
+    color: "white",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    marginVertical: 10,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 10,
-    paddingBottom: 20,
   },
   messageContainer: {
-    backgroundColor: "#F5F5F5",
-    padding: 15,
-    marginVertical: 5,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: "#2196F3",
-    maxWidth: width - 20,
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 5,
   },
   messageContent: {
     fontSize: 16,
-    color: "#000000",
-    lineHeight: 24,
-    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
-    textAlign: "left",
   },
   cursor: {
-    color: "#2196F3",
-    fontWeight: "bold",
-    opacity: 0.7,
+    fontSize: 16,
+    color: "#000",
   },
 });

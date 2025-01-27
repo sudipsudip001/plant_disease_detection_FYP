@@ -191,15 +191,10 @@ const DetailedDescription = ({
             {isConnected && !isStreamComplete && (
               <Text style={detailStyle.cursor}>▋</Text>
             )}
+            {isStreamComplete && "\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tThank You ..."}
           </Text>
         </View>
       </ScrollView>
-
-      {isStreamComplete && (
-        <View>
-          <Button title="Chat further" onPress={() => setCurrentView("chat")} />
-        </View>
-      )}
     </SafeAreaView>
   );
 };

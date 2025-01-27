@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { View, Button, Text, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useCameraPermissions } from "expo-camera";
@@ -9,7 +9,7 @@ import DetailedDescription from "./Main/DetailedDescription";
 import CaptureCamera from "./Main/CaptureCamera";
 import Camerar from "./Main/Camerar";
 import Uploaded from "./Main/Uploaded";
-import Chat from "./Main/Chat";
+import { IP_CONFIG } from "@env";
 
 const App = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -32,7 +32,7 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = "http://192.168.1.67:8000"; // change this ip address according to your device's ip address
+    val = IP_CONFIG; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }
@@ -293,15 +293,6 @@ const App = () => {
             selectedPlant={selectedPlant}
             setSelectedPlant={setSelectedPlant}
             prediction={prediction}
-            setPrediction={setPrediction}
-          />
-        );
-      case "chat":
-        return (
-          <Chat
-            setCurrentView={setCurrentView}
-            setImageUri={setImageUri}
-            setSelectedPlant={setSelectedPlant}
             setPrediction={setPrediction}
           />
         );

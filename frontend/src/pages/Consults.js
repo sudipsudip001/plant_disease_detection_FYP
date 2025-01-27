@@ -9,14 +9,15 @@ import {
   TextInput,
 } from "react-native";
 import RNEventSource from "react-native-event-source";
-import { detailStyle } from "../../styles/styles";
 
-function Chat({
-  setCurrentView,
-  setImageUri,
-  setSelectedPlant,
-  setPrediction,
-}) {
+import { detailStyle, consultStyle } from "../styles/styles";
+import { IP_CONFIG } from "@env";
+
+function Consult() {
+  const [currentView, setCurrentView] = useState("consult");
+  const [imageUri, setImageUri] = useState(null);
+  const [selectedPlant, setSelectedPlant] = useState("potato");
+  const [prediction, setPrediction] = useState(null);
   const [currentMessage, setCurrentMessage] = useState("");
   const [error, setError] = useState("");
   const [isConnected, setIsConnected] = useState(false);
@@ -24,19 +25,17 @@ function Chat({
   const [isStreamComplete, setIsStreamComplete] = useState(false);
   const eventSourceRef = useRef(null);
   const scrollViewRef = useRef(null);
-
   const [startSSE, setStartSSE] = useState(false);
-
-  const val = "http://192.168.1.71:8000";
-  //to control the input state
   const [message, setMessage] = useState("");
 
-  function Nullifier() {
-    setCurrentView("home");
-    setImageUri(null);
-    setSelectedPlant("potato");
-    setPrediction(null);
-  }
+  const val = IP_CONFIG;
+
+  // function Nullifier() {
+  //   setCurrentView("home");
+  //   setImageUri(null);
+  //   setSelectedPlant("potato");
+  //   setPrediction(null);
+  // }
 
   const connectToSSE = (question) => {
     setIsLoading(true);
@@ -135,65 +134,61 @@ function Chat({
       }
     };
   }, [startSSE]);
-  return (
-    <SafeAreaView style={detailStyle.container}>
-      <View style={detailStyle.header}>
-        <Button
-          onPress={() => {
-            setStartSSE(true);
-          }}
-          title="🦙"
-        />
-        <Button
-          onPress={() => {
-            Nullifier();
-          }}
-          title="Home"
-        />
-        <Text style={detailStyle.title}>Converse with LLAMA</Text>
-        <View style={detailStyle.statusContainer}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#2196F3" />
-          ) : (
-            <Text
-              style={[
-                detailStyle.status,
-                isConnected ? detailStyle.connected : detailStyle.disconnected,
-              ]}
-            >
-              .
-            </Text>
-          )}
-        </View>
-      </View>
-      {error !== "" && (
-        <View style={detailStyle.errorContainer}>
-          <Text style={detailStyle.error}>{error}</Text>
-        </View>
-      )}
-      <TextInput
-        style={detailStyle.input}
-        value={message}
-        onChangeText={(text) => setMessage(text)}
-        onSubmitEditing={() => console.warn("Message edited")}
-        placeholder="Type in message..."
-      />
-      <ScrollView
-        ref={scrollViewRef}
-        style={detailStyle.scrollView}
-        contentContainerStyle={detailStyle.scrollContent}
-      >
-        <View style={detailStyle.messageContainer}>
-          <Text style={detailStyle.messageContent}>
-            {currentMessage}
-            {isConnected && !isStreamComplete && (
-              <Text style={detailStyle.cursor}>▋</Text>
-            )}
+
+return (
+  <SafeAreaView style={detailStyle.container}>
+    <View style={detailStyle.header}>
+      <Text style={detailStyle.title}>Consult With AI</Text>
+      <View style={detailStyle.statusContainer}>
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#2196F3" />
+        ) : (
+          <Text
+            style={[
+              detailStyle.status,
+              isConnected ? detailStyle.connected : detailStyle.disconnected,
+            ]}
+          >
+            .
           </Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+        )}
+      </View>
+    </View>
+    {error !== "" && (
+      <View style={detailStyle.errorContainer}>
+        <Text style={detailStyle.error}>{error}</Text>
+      </View>
+    )}
+    <TextInput
+      style={detailStyle.input}
+      value={message}
+      onChangeText={(text) => setMessage(text)}
+      onSubmitEditing={() => console.warn("Message edited")}
+      placeholder="Ask about plant disease and preventions methods"
+    />
+    <Button
+      onPress={() => {
+        setStartSSE(true);
+      }}
+      title="Ask to AI"
+    />
+    <ScrollView
+      ref={scrollViewRef}
+      style={detailStyle.scrollView}
+      contentContainerStyle={detailStyle.scrollContent}
+    >
+      <View style={detailStyle.messageContainer}>
+        <Text style={detailStyle.messageContent}>
+          {currentMessage}
+          {isConnected && !isStreamComplete && (
+            <Text style={detailStyle.cursor}>▋</Text>
+          )}
+          {isStreamComplete && "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tThank You"}
+        </Text>
+      </View>
+    </ScrollView>
+  </SafeAreaView>
+);
 }
 
-export default Chat;
+export default Consult;
