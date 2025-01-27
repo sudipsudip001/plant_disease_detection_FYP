@@ -53,7 +53,7 @@ const Home = ({ navigation }) => {
     >
       <View style={mainHomeStyle.container}>
         <Animated.Text style={[mainHomeStyle.title, { opacity: fadeAnim }]}>
-          Welcome to Plant Disease Prediction App!
+           Plant Disease Prediction App!
         </Animated.Text>
 
         <View>

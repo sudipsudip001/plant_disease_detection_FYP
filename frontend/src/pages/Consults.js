@@ -135,60 +135,59 @@ function Consult() {
     };
   }, [startSSE]);
 
-return (
-  <SafeAreaView style={detailStyle.container}>
-    <View style={detailStyle.header}>
-      <Text style={detailStyle.title}>Consult With AI</Text>
-      <View style={detailStyle.statusContainer}>
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#2196F3" />
-        ) : (
-          <Text
-            style={[
-              detailStyle.status,
-              isConnected ? detailStyle.connected : detailStyle.disconnected,
-            ]}
-          >
-            .
-          </Text>
-        )}
-      </View>
-    </View>
-    {error !== "" && (
-      <View style={detailStyle.errorContainer}>
-        <Text style={detailStyle.error}>{error}</Text>
-      </View>
-    )}
-    <TextInput
-      style={detailStyle.input}
-      value={message}
-      onChangeText={(text) => setMessage(text)}
-      onSubmitEditing={() => console.warn("Message edited")}
-      placeholder="Ask about plant disease and preventions methods"
-    />
-    <Button
-      onPress={() => {
-        setStartSSE(true);
-      }}
-      title="Ask to AI"
-    />
-    <ScrollView
-      ref={scrollViewRef}
-      style={detailStyle.scrollView}
-      contentContainerStyle={detailStyle.scrollContent}
-    >
-      <View style={detailStyle.messageContainer}>
-        <Text style={detailStyle.messageContent}>
-          {currentMessage}
-          {isConnected && !isStreamComplete && (
-            <Text style={detailStyle.cursor}>▋</Text>
+  return (
+    <SafeAreaView style={detailStyle.container}>
+      <View style={detailStyle.header}>
+        <Text style={detailStyle.title}>Consult With AI</Text>
+        <View style={detailStyle.statusContainer}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#2196F3" />
+          ) : (
+            <Text
+              style={[
+                detailStyle.status,
+                isConnected ? detailStyle.connected : detailStyle.disconnected,
+              ]}
+            >
+              .
+            </Text>
           )}
-          {isStreamComplete && "\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tThank You"}
-        </Text>
+        </View>
       </View>
-    </ScrollView>
-  </SafeAreaView>
-);
+      {error !== "" && (
+        <View style={detailStyle.errorContainer}>
+          <Text style={detailStyle.error}>{error}</Text>
+        </View>
+      )}
+      <TextInput
+        style={detailStyle.input}
+        value={message}
+        onChangeText={(text) => setMessage(text)}
+        onSubmitEditing={() => console.warn("Message edited")}
+        placeholder="Ask about plant disease and preventions methods"
+      />
+      <Button
+        onPress={() => {
+          setStartSSE(true);
+        }}
+        title="Ask to AI"
+      />
+      <ScrollView
+        ref={scrollViewRef}
+        style={detailStyle.scrollView}
+        contentContainerStyle={detailStyle.scrollContent}
+      >
+        <View style={detailStyle.messageContainer}>
+          <Text style={detailStyle.messageContent}>
+            {currentMessage}
+            {isConnected && !isStreamComplete && (
+              <Text style={detailStyle.cursor}>▋</Text>
+            )}
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 export default Consult;

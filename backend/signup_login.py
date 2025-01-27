@@ -1,43 +1,37 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from database import get_db
 from models import User
-from schemas import UserCreate, UserOut, UserLogin
+from schemas import UserCreate, UserLogin
 from auth import validate_password_strength
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 import jwt
 from fastapi.responses import JSONResponse
-import logging
 
 router = APIRouter()
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-
-# Secret key to encode the JWT token
+# Secret key for JWT encoding
 SECRET_KEY = "abcd"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Password hashing configuration using passlib
+# Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# Function to create a JWT access token
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# Endpoint to create a new user (Signup)
-@router.post("/signup", response_model=UserOut)
+# Signup endpoint
+@router.post("/signup")
 async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    # Check if email already exists
+    # Check if the email is already registered
     result = await db.execute(select(User).where(User.email == user.email))
     existing_user = result.scalars().first()
     if existing_user:
@@ -56,25 +50,30 @@ async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
         password=hashed_password
     )
 
-    # Add user to the database
+    # Add the user to the database
     db.add(new_user)
     await db.commit()
+    await db.refresh(new_user)
 
     # Create JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": new_user.email}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data={"sub": new_user.email}, expires_delta=access_token_expires)
 
-    response = JSONResponse(content={"id": new_user.id, "username": new_user.username, "email": new_user.email ,"access_token":access_token})
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    # Return response with user info and token
+    return {
+        "message": "Signup successful",
+        "user": {
+            "username": new_user.username,
+            "email": new_user.email
+        },
+        "access_token": access_token,
+        "token_type": "Bearer"
+    }
 
-    return response
-
-# Endpoint for user login
+# Login endpoint
 @router.post("/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
-    # Check if user exists
+    # Check if the user exists
     result = await db.execute(select(User).where(User.email == user.email))
     existing_user = result.scalars().first()
     if not existing_user:
@@ -86,12 +85,23 @@ async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
 
     # Create JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": existing_user.email}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
-    response = JSONResponse(content={"message": "Login successful", "access_token": access_token})
-     logging.debug(f"Response content: {response}")
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    # Return response with user info and token
+    return {
+        "message": "Login successful",
+        "user": {
+            "username": existing_user.username,
+            "email": existing_user.email
+        },
+        "access_token": access_token,
+        "token_type": "Bearer"
+    }
 
+# Logout endpoint
+@router.post("/logout")
+async def logout():
+    # Return a message indicating successful logout
+    response = JSONResponse(content={"message": "Logout successful"})
+    response.delete_cookie(key="access_token")  # Delete token from client-side cookies if set
     return response

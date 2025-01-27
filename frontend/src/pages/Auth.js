@@ -8,6 +8,8 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
+// import useAuthStore from "../store/authStore";
+
 
 const Profile = ({ handleLogout }) => {
   return (
@@ -21,26 +23,30 @@ const Profile = ({ handleLogout }) => {
 const Auth = ({ navigation }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
+  //  const { isUserAuthenticated, login, signup, logout } = useAuthStore();
+
   const handleSignup = () => {
-    if (email && password && confirmPassword) {
-      if (password === confirmPassword) {
-        Alert.alert("Signed up successfully", `Welcome, ${email}`);
-        setIsAuthenticated(true); // Set authenticated state to true
-      } else {
-        Alert.alert("Error", "Passwords do not match");
+    if (!email && !password && !username) 
+      {
+        // signup(email,password)
+        Alert.alert("Error", "Please fill out all fields");
+        alert("Enter all fields")
       }
-    } else {
-      Alert.alert("Error", "Please fill out all fields");
-    }
+      else{
+       Alert.alert("Signup successfull, You can login now");
+       alert("SignUp successfull, you can login now")
+       setIsAuthenticated(false);
+      }
   };
 
   const handleLogin = () => {
     if (loginEmail && loginPassword) {
+       Alert.alert("Login successfull");
       setIsAuthenticated(true); // Set authenticated state to true
     } else {
       alert("Please enter valid credentials");
@@ -62,23 +68,22 @@ const Auth = ({ navigation }) => {
         <Text style={styles.title}>User Sign Up</Text>
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="Enter Email"
           value={email}
           onChangeText={setEmail}
         />
         <TextInput
           style={styles.input}
-          placeholder="Password"
-          value={password}
-          secureTextEntry
-          onChangeText={setPassword}
+          placeholder="Enter username"
+          value={username}
+          onChangeText={setUsername}
         />
         <TextInput
           style={styles.input}
-          placeholder="Confirm Password"
-          value={confirmPassword}
+          placeholder="Enter Password"
+          value={password}
           secureTextEntry
-          onChangeText={setConfirmPassword}
+          onChangeText={setPassword}
         />
         <Button title="Sign Up" onPress={handleSignup} />
       </View>
