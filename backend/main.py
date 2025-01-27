@@ -12,6 +12,7 @@ from pydantic import BaseModel
 import asyncio
 from typing import AsyncGenerator
 import json
+from routes.signup_login import router as signup_login_router
 
 #loading models
 PLANT_MODELS = {
@@ -41,6 +42,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+#include this line for login and sigup
+
+app.include_router(signup_login_router, prefix="/auth")
 
 #image prepocessing to match the model
 def preprocess_image(file_bytes, target_size=(256, 256)):
