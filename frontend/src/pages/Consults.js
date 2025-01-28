@@ -11,7 +11,6 @@ import {
 import RNEventSource from "react-native-event-source";
 
 import { detailStyle, consultStyle } from "../styles/styles";
-import { IP_CONFIG } from "@env";
 
 function Consult() {
   const [currentView, setCurrentView] = useState("consult");
@@ -28,7 +27,7 @@ function Consult() {
   const [startSSE, setStartSSE] = useState(false);
   const [message, setMessage] = useState("");
 
-  const val = IP_CONFIG;
+  const val = "http://192.168.1.67:8000";
 
   // function Nullifier() {
   //   setCurrentView("home");

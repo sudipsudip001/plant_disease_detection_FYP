@@ -21,10 +21,8 @@ PLANT_MODELS = {
         'class_names': ['Early blight', 'Late blight', 'Healthy']
     },
     'tomato': {
-        'model': tf.keras.models.load_model('../model/tomato.h5'),
-        'class_names': ['Bacterial spot', 'Early blight', 'Late blight', 'Leaf mold', 'Septoria leaf spot', 
-                            'Two spotted spider mites', 'Target spot', 'Yellow leaf curl virus',
-                            'Mosaic virus', 'Healthy']
+        'model' : tf.keras.models.load_model('../model/tomato.h5', custom_objects={'KerasLayer': hub.KerasLayer}),
+        'class_names': ['Bacterial Spot', 'Early Blight', 'Healthy', 'Late Blight', 'Leaf Mold', 'Mosaic Virus', 'Septoria Leaf spot', 'Target Spot', 'Two Spotted spider mites', 'Yellowleaf curl virus']
     },
     'pepper': {
         'model': tf.keras.models.load_model('../model/pepper.h5'),
@@ -77,6 +75,16 @@ class chatValues(BaseModel):
 
 async def generate_llm_response(plant: str, disease: str) -> AsyncGenerator[str, None]:
     async_client = AsyncClient()
+    
+    if disease == "Healthy":
+        healthy_message = {
+            "content": f"Your {plant} appears to be healthy! This is great news. Continue maintaining proper cultural practices like adequate watering, appropriate sunlight exposure, and good air circulation. Regular monitoring for any changes in plant health is always recommended as part of preventive care."
+        }
+        data = json.dumps({"content": healthy_message["content"]})
+        yield f"data: {data}\n\n"
+        yield "event: close\ndata: Stream completed\n\n"
+        return
+
     message = {
         "role": "user",
         "content": f"As a plant pathologist, provide a concise explanation of {disease} in {plant}. Part 1 - Disease Overview: - What is the specific pathogen causing {disease}?- What are the primary symptoms of the disease?- How does the disease spread? Part 2 - Disease Management:- What are key prevention strategies?- What are effective treatment methods?- What cultural practices can minimize disease impact? Provide a technical, precise response focused on actionable information for farmers and agricultural professionals. Remove special syntaxes like **, avoid using tabs or complex formatting, use plain text with clear, simple structure.",
@@ -176,6 +184,34 @@ async def predict(plant: str, file: UploadFile = File(...)):
         except Exception as e:
             print("Couldn't test the model for leaf or not")
             print("Actual error ", str(e))
+
+        if(predicted_label_batch == "leaf" and plant.lower() == "tomato"):
+            try:
+                tomato_model = PLANT_MODELS[plant.lower()]
+                model = tomato_model['model']
+                class_names = tomato_model['class_names']
+
+                dup_img = Image.open(io.BytesIO(contents))
+                dup_img = dup_img.resize((224, 224))
+                dup_img = dup_img.convert('RGB')
+                dup_img_array = np.array(dup_img)
+                dup_img_array = dup_img_array/255.0
+                dup_img_array = np.expand_dims(dup_img_array, axis=0)
+
+                predictions = model.predict(dup_img_array)
+
+                probabilities = tf.nn.softmax(predictions[0])
+                predicted_class = class_names[tf.math.argmax(probabilities, axis=-1)]
+                confidence = round(100*float(np.max(probabilities)), 2)
+
+                return{
+                    "plant": plant,
+                    "predicted_class": predicted_class,
+                    "confidence": confidence,
+                }
+            except Exception as e:
+                print("Error in prediction.")
+                print("Actual error ", str(e))
         
         if(predicted_label_batch == "leaf"):
             if img_array is None:

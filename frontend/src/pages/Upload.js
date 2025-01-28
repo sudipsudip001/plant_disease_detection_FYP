@@ -9,7 +9,6 @@ import DetailedDescription from "./Main/DetailedDescription";
 import CaptureCamera from "./Main/CaptureCamera";
 import Camerar from "./Main/Camerar";
 import Uploaded from "./Main/Uploaded";
-import { IP_CONFIG } from "@env";
 
 const App = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -32,7 +31,7 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = "http://192.168.1.69:8000"; // change this ip address according to your device's ip address
+    val = "http://192.168.1.67:8000"; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }

@@ -14,6 +14,7 @@ import { mainHomeStyle } from "../styles/styles";
 const Home = ({ navigation }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [weatherData, setWeatherData] = useState(null);
+  const [once, setOnce] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -53,7 +54,7 @@ const Home = ({ navigation }) => {
     >
       <View style={mainHomeStyle.container}>
         <Animated.Text style={[mainHomeStyle.title, { opacity: fadeAnim }]}>
-           Plant Disease Prediction App!
+          Plant Disease Prediction App!
         </Animated.Text>
 
         <View>
@@ -83,12 +84,17 @@ const Home = ({ navigation }) => {
           )}
         </View>
 
-        <TouchableOpacity
-          style={mainHomeStyle.button}
-          onPress={() => navigation.navigate("Upload")}
-        >
-          <Text style={mainHomeStyle.buttonText}>Get Started</Text>
-        </TouchableOpacity>
+        {!once && (
+          <TouchableOpacity
+            style={mainHomeStyle.button}
+            onPress={() => {
+              navigation.navigate("Upload");
+              setOnce(true);
+            }}
+          >
+            <Text style={mainHomeStyle.buttonText}>Get Started</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ImageBackground>
   );
