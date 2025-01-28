@@ -32,7 +32,7 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = "http://192.168.1.69:8000"; // change this ip address according to your device's ip address
+    val = "http://192.168.1.71:8000"; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }
@@ -141,6 +141,7 @@ const App = () => {
           },
         }
       );
+      console.log("Respinse ", response);
       setPrediction(response.data);
     } catch (error) {
       try {
@@ -171,6 +172,7 @@ const App = () => {
     }
 
     final = `${val}/predict/${selectedPlant}`; // note that '/' at the end of the url can cause errors.
+    // console.log(final);
     if (Platform.OS === "android") {
       const formData = new FormData();
       formData.append("file", {
@@ -186,6 +188,7 @@ const App = () => {
             "Content-Type": "multipart/form-data",
           },
         });
+        // console.log("Testing ", response);
         setPrediction(response.data);
       } catch (error) {
         //repeated the block due to error in the first try of requesting the URL

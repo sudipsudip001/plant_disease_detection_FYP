@@ -50,7 +50,7 @@ const DetailedDescription = ({
         eventSourceRef.current.close();
       }
 
-      const url = `${IP_CONFIG}/chat?plant=${encodeURIComponent(
+      const url = `${val}/chat?plant=${encodeURIComponent(
         plant
       )}&disease=${encodeURIComponent(disease)}`;
 
