@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import RNEventSource from "react-native-event-source";
 import { detailStyle } from "../../styles/styles";
+import { IP_CONFIG } from "@env";
 
 const DetailedDescription = ({
   val,
@@ -49,7 +50,7 @@ const DetailedDescription = ({
         eventSourceRef.current.close();
       }
 
-      const url = `${val}/chat?plant=${encodeURIComponent(
+      const url = `${IP_CONFIG}/chat?plant=${encodeURIComponent(
         plant
       )}&disease=${encodeURIComponent(disease)}`;
 
@@ -191,7 +192,6 @@ const DetailedDescription = ({
             {isConnected && !isStreamComplete && (
               <Text style={detailStyle.cursor}>▋</Text>
             )}
-    
           </Text>
         </View>
       </ScrollView>

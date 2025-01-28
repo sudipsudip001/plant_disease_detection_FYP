@@ -32,7 +32,7 @@ const App = () => {
 
   let val;
   if (Platform.OS === "android") {
-    val = IP_CONFIG; // change this ip address according to your device's ip address
+    val = "http://192.168.1.69:8000"; // change this ip address according to your device's ip address
   } else {
     val = "http://localhost:8000";
   }
@@ -284,6 +284,7 @@ const App = () => {
             promptTheLLM={setCurrentView}
           />
         );
+
       case "detailedDescription":
         return (
           <DetailedDescription

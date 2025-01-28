@@ -45,6 +45,7 @@ function Consult() {
       }
 
       const url = `${val}/converse?question=${encodeURIComponent(question)}`;
+      console.log(url);
 
       setIsLoading(true);
       setCurrentMessage("");
