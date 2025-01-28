@@ -1,12 +1,14 @@
-from sqlalchemy import Column, Integer, String
-from database import Base
+from sqlalchemy import Column, Integer, String, TIMESTAMP, func
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "User"
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)
-    fname = Column(String)  # Optional field not used in endpoints
-    lname = Column(String)  # Optional field not used in endpoints
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), nullable=False)
+    email = Column(String(100), nullable=False, unique=True)
+    password = Column(String(255), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())

@@ -15,5 +15,6 @@ asyncpg
 databases
 passlib[bcrypt] 
 python-jose
+pyjwt
 
 

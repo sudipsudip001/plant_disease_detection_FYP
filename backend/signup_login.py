@@ -1,104 +1,107 @@
-from fastapi import FastAPI, Depends, HTTPException
-from pydantic import BaseModel, EmailStr 
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from database import get_db, database
+from database import get_db
 from models import User
-import uvicorn
+from schemas import UserCreate, UserLogin
+from auth import validate_password_strength
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
+import jwt
+from fastapi.responses import JSONResponse
 
+router = APIRouter()
 
-app = FastAPI()
+# Secret key for JWT encoding
+SECRET_KEY = "abcd"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# Password hashing configuration
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-@app.get("/test-connection")
-async def test_connection():
-    try:
-        await database.connect()
-        await database.disconnect()
-        return {"status": "Connection successful"}
-    except Exception as e:
-        return {"status": "Connection failed", "error": str(e)}
+# Function to create a JWT access token
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
-
-# Set up Passlib context for bcrypt
-pwd_context = CryptContext (schemes=["bcrypt"], deprecated="auto")
- 
-
-# Pydantic models for request data validation
-class UserSignup(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-# Endpoint for Signup
-@app.post("/signup")
-async def signup(user: UserSignup, db: AsyncSession = Depends(get_db)):
-    # Check if email already exists
+# Signup endpoint
+@router.post("/signup")
+async def signup(user: UserCreate, db: AsyncSession = Depends(get_db)):
+    # Check if the email is already registered
     result = await db.execute(select(User).where(User.email == user.email))
     existing_user = result.scalars().first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    
+    # Validate password strength
+    validate_password_strength(user.password)
+
     # Hash the password
     hashed_password = pwd_context.hash(user.password)
 
-    # Create and add new user to the database
+    # Create a new user instance
     new_user = User(
-                    username=user.username, 
-                    email=user.email, 
-                    password=hashed_password
-                    )
+        username=user.username,
+        email=user.email,
+        password=hashed_password
+    )
 
+    # Add the user to the database
     db.add(new_user)
     await db.commit()
+    await db.refresh(new_user)
 
-    return {"message": "User created successfully"}
-    
+    # Create JWT token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": new_user.email}, expires_delta=access_token_expires)
 
-# Endpoint for Login
-@app.post("/login")
+    # Return response with user info and token
+    return {
+        "message": "Signup successful",
+        "user": {
+            "username": new_user.username,
+            "email": new_user.email
+        },
+        "access_token": access_token,
+        "token_type": "Bearer"
+    }
+
+# Login endpoint
+@router.post("/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
-    # Check if user exists
+    # Check if the user exists
     result = await db.execute(select(User).where(User.email == user.email))
     existing_user = result.scalars().first()
     if not existing_user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
-    
-    # Verify the password against the hashed password stored in the database
+
+    # Verify the password
     if not pwd_context.verify(user.password, existing_user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
+    # Create JWT token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
-    return {"message": "Login successful"}
+    # Return response with user info and token
+    return {
+        "message": "Login successful",
+        "user": {
+            "username": existing_user.username,
+            "email": existing_user.email
+        },
+        "access_token": access_token,
+        "token_type": "Bearer"
+    }
 
-
-# Endpoint to list all usernames
-@app.get("/users")
-async def list_usernames(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User))
-    users = result.scalars().all()
-    usernames = [user.username for user in users]
-    return {"usernames": usernames}
-
-
-
-#HEalth-Check
-@app.get("/")
-async def health_check():
-    return {"Welcome to plant app"}
-
-
-#to run the file
-if __name__ == "__main__":
-    uvicorn.run("signup_login:app",
-    host="0.0.0.0",
-    port=8001,
-    reload=True
-)
-# uvicorn signup_login:app --host 0.0.0.0 --port 8001 --reload # to run the application
+# Logout endpoint
+@router.post("/logout")
+async def logout():
+    # Return a message indicating successful logout
+    response = JSONResponse(content={"message": "Logout successful"})
+    response.delete_cookie(key="access_token")  # Delete token from client-side cookies if set
+    return response

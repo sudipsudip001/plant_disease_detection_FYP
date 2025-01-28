@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { View, Button, Text, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useCameraPermissions } from "expo-camera";
@@ -9,7 +9,6 @@ import DetailedDescription from "./Main/DetailedDescription";
 import CaptureCamera from "./Main/CaptureCamera";
 import Camerar from "./Main/Camerar";
 import Uploaded from "./Main/Uploaded";
-import Chat from "./Main/Chat";
 
 const App = () => {
   const [imageUri, setImageUri] = useState(null);
@@ -284,6 +283,7 @@ const App = () => {
             promptTheLLM={setCurrentView}
           />
         );
+
       case "detailedDescription":
         return (
           <DetailedDescription
@@ -293,15 +293,6 @@ const App = () => {
             selectedPlant={selectedPlant}
             setSelectedPlant={setSelectedPlant}
             prediction={prediction}
-            setPrediction={setPrediction}
-          />
-        );
-      case "chat":
-        return (
-          <Chat
-            setCurrentView={setCurrentView}
-            setImageUri={setImageUri}
-            setSelectedPlant={setSelectedPlant}
             setPrediction={setPrediction}
           />
         );

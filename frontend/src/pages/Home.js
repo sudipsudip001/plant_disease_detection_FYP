@@ -14,6 +14,7 @@ import { mainHomeStyle } from "../styles/styles";
 const Home = ({ navigation }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [weatherData, setWeatherData] = useState(null);
+  const [once, setOnce] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -47,13 +48,13 @@ const Home = ({ navigation }) => {
   return (
     <ImageBackground
       source={{
-        uri: "https://media.istockphoto.com/id/1181366400/photo/in-the-hands-of-trees-growing-seedlings-bokeh-green-background-female-hand-holding-tree-on.jpg?s=612x612&w=0&k=20&c=jWUMrHgjMY9zQXsAwZFb1jfM6KxZE16-IXI1bvehjQM=",
+        uri: "https://images.rawpixel.com/image_social_landscape/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvdjk4Ni1iZy0wMi1rcWhlM3dpdC5qcGc.jpg",
       }}
       style={mainHomeStyle.backgroundImage}
     >
       <View style={mainHomeStyle.container}>
         <Animated.Text style={[mainHomeStyle.title, { opacity: fadeAnim }]}>
-          Welcome to Plant Disease Prediction App!
+          Plant Disease Prediction App!
         </Animated.Text>
 
         <View>
@@ -83,12 +84,17 @@ const Home = ({ navigation }) => {
           )}
         </View>
 
-        <TouchableOpacity
-          style={mainHomeStyle.button}
-          onPress={() => navigation.navigate("Upload")}
-        >
-          <Text style={mainHomeStyle.buttonText}>Get Started</Text>
-        </TouchableOpacity>
+        {!once && (
+          <TouchableOpacity
+            style={mainHomeStyle.button}
+            onPress={() => {
+              navigation.navigate("Upload");
+              setOnce(true);
+            }}
+          >
+            <Text style={mainHomeStyle.buttonText}>Get Started</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ImageBackground>
   );

@@ -194,12 +194,6 @@ const DetailedDescription = ({
           </Text>
         </View>
       </ScrollView>
-
-      {isStreamComplete && (
-        <View>
-          <Button title="Chat further" onPress={() => setCurrentView("chat")} />
-        </View>
-      )}
     </SafeAreaView>
   );
 };
