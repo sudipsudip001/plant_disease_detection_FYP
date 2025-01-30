@@ -1,44 +1,133 @@
-**Plant Disease Detection FYP(Final Year Project)**
+# Plant Disease Detection - Final Year Project
 
-This repository contains the code for frontend, backend and model notebooks for the Final Year Project as part of our Computer Science Degree. The frontend application was made in `React Native using expo` and the backend in `Fast API`. We specifically used `Tensorflow` and
-`Tensorflow Hub` for model creation and transfer learning respectively.
+## Overview
+This repository contains a mobile application for plant disease detection, developed as a Final Year Project for our Computer Science Degree. The system aims to make plant disease detection more accessible to farmers through mobile devices, helping reduce the 20-40% annual global crop waste through timely detection and treatment.
 
-Our main objective for the project was to make the plant disease detection easier and accessible for farmers using mobile devices. Annually, 20-40% of the global crops go wasted which causes farmer to bear heavy loss and thus, in order to mitigate and minimize it, timely
-detection and treatment becomes crucial. Our project aimed at providing timely recognition of disease as a right rather than a luxury in order to help farmers in an agricultural country like ours.
+## Features
+- Disease detection for Potato, Tomato, and Pepper plants
+- Real-time disease classification using CNN models
+- Interactive chat interface using LLAMA 3.2 3B model via Ollama
+- ChatGPT-like continuous response using SSE (Server Sent Events)
 
-In the preliminary phase we have three plants to predict the disease from, namely `Potato`, `Tomato` and `Pepper`. The plants were chosen based on the availability of data, which was taken from ['PlantVillage' dataset](https://github.com/spMohanty/PlantVillage-Dataset). There
-were 2 classes for Pepper, 3 classes for Potato and 10 classes to predict from Tomato as can be seen from the dataset. Along with the plant disease predition using CNN, we also used a model created from `Transfer Learning` in order to classify the initially inputed image of
-whether it is a leaf or not. Besides this image classification task, we also integrated the use of LLM through `Ollama` that provided access to the `LLAMA 3.2 3B` model for the users to chat or know details about the predicted output. And one of the most attractive UI feature
-of the project was the use of `SSE(Server Sent Events)` which allowed us to generate a *ChatGPT like(continuous)* response in the UI.
+## Tech Stack
+- Frontend: React Native with Expo
+- Backend: FastAPI
+- Machine Learning: TensorFlow & TensorFlow Hub
+- Chat Model: Ollama (LLAMA 3.2 3B)
 
-In the prediction part, we were able to achieve a significant accuracy levels for the plants which were thus measured using the Confusion matrix. The accuracies were *99% for pepper*, *95% for potato* and *92% for tomato* as of January 29, 2025. The workflow was pretty smooth
-and functional as well though much improvements would be required for it to become a fully fledged real world mobile application. To talk about the CNN model, we used a VGG (Visual Geometry Group) like architecture in our model training process. Altogether 6 layers were formed
-with each layer constituting a Convolutional layer of filter size 3\*3 and Maxpooling layer of size 2\*2. Finally the layers are flattened and a Dense layer is used in the output to classify models according to their number of classes.
+## Project Structure
+```
+plant_disease_detection_FYP/
+├── backend/
+│   ├── main.py             # API endpoints
+│   └── requirements.txt    # Python dependencies
+├── frontend/
+│   └── components          # React Native components
+└── model/
+    ├── notebooks/          # Model training notebooks
+    └── .h5 files           # Trained model files like potato.h5, tomato.h5, pepper.h5, leaf_nonleaf.h5
+```
 
-For transfer learning we used the procedures from the official [Tensorflow_hub](https://www.tensorflow.org/tutorials/images/transfer_learning_with_hub). This was used in order to classify datasets for initial leaf or non-leaf categorization.
+## Model Architecture
+Our CNN architecture follows a VGG-like structure:
+- Input Layer: Accepts 224x224x3 RGB images
+- 6 Sequential Blocks, each containing:
+  - Convolutional Layer (3x3 filter)
+  - MaxPooling Layer (2x2)
+- Flatten Layer
+- Dense Output Layer (class-specific)
 
-In order to make it run on your system, here are some important tips after you clone the repository in your local machine:
-1. Clone the repository: `git clone https://github.com/sudipsudip001/plant_disease_detection_FYP.git`
-2. `cd plant_disease_detection_FYP`
-3. For backend
-   - Navigate to the backend repository in terminal, using `cd backend`.
-   - Create a virtual environment or directly install all the requirements in your default environment using `pip install -r requirements.txt` command.
-   - Use the command `uvicorn main:app --host 0.0.0.0 --port 8000 --reload` to run the backend server.
-4. For frontend
-   - Navigate to your frontend repository using, `cd..` followed by `cd frontend` command.
-   - `npm install`
-   - Open command prompt. Type in ipconfig and copy the IP address of IPV4 and change the ip addresses in: Upload.js and Consults.js (for variable val). Change the middle ip address i.e. `192.168.1.57` part of the var variable.
-   - Use npm start to run the application and press 'w' or 'a' or others according to the device that you want to open. Please check expo documentation for more details.
-5. Run Ollama application in your device as well to run the chat interface.
+Current Model Accuracies:
+- Pepper: 100% (Please don't judge, there were only two classes)
+- Potato: 96.7%
+- Tomato: 89.67%
 
-*Note: Make sure you run your server(backend application) before you run your frontend in order to avoid any potential errors.*
+## Installation
 
-Some of the works that need to be done are mentioned as follows:
+### 1. Clone the Repository
+```bash
+git clone https://github.com/sudipsudip001/plant_disease_detection_FYP.git
+cd plant_disease_detection_FYP
+```
 
-- [ ] Make the application work in offline mode using Cache detection models & FAQs for offline use.
-- [ ] Add Plant Care tracker, which is a simple calendar based reminders for watering, fertilizing, etc.
-- [ ] Add authentication and sign in features along with global chat system that also allows sharing of captured images/videos for troubleshooting and information sharing.
-- [ ] Add voice-to-text input for hands-free usage or using the mobile application for illiterate people.
-- [ ] Highlight the affected area of plant and improve the accuracy of prediction.
+### 2. Backend Setup
+```bash
+cd backend
+python -m venv venv  # Create virtual environment (optional but recommended)
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-Overall this was my first mobile app project and gave in some insights into mobile application development in general. Here's a link to the demonstration [video of the application](https://youtu.be/-vwPAobbybs).
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+```
+
+### 4. Configure IP Address
+1. Get your IP address:
+   - Windows: Open CMD and type `ipconfig`
+   - macOS/Linux: Open terminal and type `ifconfig`
+2. Update IP address in frontend files:
+   - Navigate to `Upload.js` and `Consults.js`
+   - Replace `192.168.1.67` with your IP address in the `var` variable
+
+### 5. Ollama Setup
+1. Download Ollama from [ollama.ai](https://ollama.ai)
+2. Install and run the application
+3. First-time setup will automatically download required models
+
+### 6. Run the Application
+```bash
+npm start
+```
+Then press:
+- `w` for web
+- `a` for Android
+- `i` for iOS
+
+## Dataset Training
+1. Download datasets:
+   - [PlantVillage Dataset (Kaggle)](https://www.kaggle.com/datasets/arjuntejaswi/plant-village)
+   - [COCO Dataset](https://cocodataset.org/#home)
+2. Split data into train/test/validation sets
+3. Run training notebooks in `model/notebooks/`
+
+*Important note: It is advised to split the data manually or using a script into train, test and validation sets. Make sure you put the dataset within the notebook folder and change the paths accordingly in the notebook.*
+
+## Troubleshooting
+Common issues and solutions:
+
+1. Backend Connection Error:
+   - Verify IP address configuration
+   - Check if backend server is running
+   - Ensure ports are not blocked by firewall
+
+2. Model Loading Error:
+   - Verify model files are in correct location
+   - Check Python environment has all dependencies
+
+3. Ollama Connection Issues:
+   - Ensure Ollama is running
+   - Check network connectivity
+   - Verify model is downloaded (i.e. LLAMA 3.2 3b)
+
+## Future Improvements
+- [ ] Offline mode support with cached models & FAQs
+- [ ] Plant Care tracker with calendar-based reminders
+- [ ] Authentication and global chat system
+- [ ] Voice-to-text input for accessibility
+- [ ] Affected area highlighting and improved prediction accuracy
+
+## Demo
+Watch our [application demonstration video](https://youtu.be/-vwPAobbybs)
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+- [PlantVillage Dataset](https://github.com/spMohanty/PlantVillage-Dataset) for training data
+- COCO team for the dataset
+- TensorFlow team for transfer learning resources
+- Ollama team for the chat model
