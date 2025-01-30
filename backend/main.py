@@ -12,7 +12,7 @@ from pydantic import BaseModel
 import asyncio
 from typing import AsyncGenerator
 import json
-# from routes.signup_login import router as signup_login_router
+from routes.signup_login import router as signup_login_router
 
 #loading models
 PLANT_MODELS = {
@@ -21,7 +21,7 @@ PLANT_MODELS = {
         'class_names': ['Early blight', 'Late blight', 'Healthy']
     },
     'tomato': {
-        'model': tf.keras.models.load_model('../model/tomato.h5'),
+        'model' : tf.keras.models.load_model('../model/tomato.h5', custom_objects={'KerasLayer': hub.KerasLayer}),
         'class_names': ['Bacterial Spot', 'Early Blight', 'Healthy', 'Late Blight', 'Leaf Mold', 'Mosaic Virus', 'Septoria Leaf spot', 'Target Spot', 'Two Spotted spider mites', 'Yellowleaf curl virus']
     },
     'pepper': {
@@ -40,6 +40,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+#include this line for login and sigup
+
+app.include_router(signup_login_router, prefix="/auth")
 
 #image prepocessing to match the model
 def preprocess_image(file_bytes, target_size=(256, 256)):
@@ -176,9 +179,39 @@ async def predict(plant: str, file: UploadFile = File(...)):
             leaf_or_not = leaf_model.predict(dup_img_array)
             predicted_id = tf.math.argmax(leaf_or_not, axis=-1)
             predicted_label_batch = class_names[predicted_id]
+            print(predicted_label_batch)
+            #the code updated till this
         except Exception as e:
             print("Couldn't test the model for leaf or not")
             print("Actual error ", str(e))
+
+        if(predicted_label_batch == "leaf" and plant.lower() == "tomato"):
+            try:
+                tomato_model = PLANT_MODELS[plant.lower()]
+                model = tomato_model['model']
+                class_names = tomato_model['class_names']
+
+                dup_img = Image.open(io.BytesIO(contents))
+                dup_img = dup_img.resize((224, 224))
+                dup_img = dup_img.convert('RGB')
+                dup_img_array = np.array(dup_img)
+                dup_img_array = dup_img_array/255.0
+                dup_img_array = np.expand_dims(dup_img_array, axis=0)
+
+                predictions = model.predict(dup_img_array)
+
+                probabilities = tf.nn.softmax(predictions[0])
+                predicted_class = class_names[tf.math.argmax(probabilities, axis=-1)]
+                confidence = round(100*float(np.max(probabilities)), 2)
+
+                return{
+                    "plant": plant,
+                    "predicted_class": predicted_class,
+                    "confidence": confidence,
+                }
+            except Exception as e:
+                print("Error in prediction.")
+                print("Actual error ", str(e))
         
         if(predicted_label_batch == "leaf"):
             if img_array is None:
